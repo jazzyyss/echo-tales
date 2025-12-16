@@ -1,0 +1,38 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+out/
+coverage/
+**/dist/
+**/build/
+**/out/
+**/.vite/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc secrets
+*.pem
+*.key
