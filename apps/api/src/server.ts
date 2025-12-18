@@ -1,11 +1,13 @@
-import express from "Express";
-const app = express();
+import app from "./app.js";
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 (async () => {
-
-  app.listen(PORT, _ => {
-    console.log(`Server running on port ${PORT}`);
-  });
+    try{
+      app.listen(PORT, _ => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }catch(err){
+      console.log("startup failed. ", err)
+    }
 })();

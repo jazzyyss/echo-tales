@@ -4,9 +4,8 @@ function App() {
 
   return (
     <>
-      <div>
-        Jaspreet Singh
-      </div>
+      <div className="text-3xl text-red-950 p-4">Jaspreet Singh</div>
+
     </>
   )
 }

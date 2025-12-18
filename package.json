@@ -6,10 +6,15 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=apps/client & npm run dev --workspace=apps/api",
-    "build": "npm run build --workspace=apps/client && npm run build --workspace=apps/api"
+    "dev": "concurrently \"npm run dev -w @tales-echo/client\" \"npm run dev -w @tales-echo/api\"",
+    "build": "npm run build --workspace=apps/client && npm run build --workspace=apps/api",
+    "run-client": "",
+    "run-api":""
   },
   "keywords": [],
   "author": "Jaspreet Singh",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
