@@ -13,9 +13,13 @@ function setRefreshCookie(res: Response, token: string) {
   });
 }
 
-function toPublic(user: any) {
+function clearRefreshCookie(res: Response) {
+  res.clearCookie("refreshToken", { path: "/api/auth/refresh" });
+}
+
+function toPublic(user: { _id: unknown; fullName: string; email: string; createdAt: Date; updatedAt: Date }) {
   return {
-    id: user._id.toString(),
+    id: String(user._id),
     fullName: user.fullName,
     email: user.email,
     createdAt: user.createdAt,
@@ -25,13 +29,19 @@ function toPublic(user: any) {
 
 export async function signup(req: Request, res: Response) {
   const parsed = signupSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten() });
-
-  const { fullName, email, password } = parsed.data;
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten() });
+  }
 
   try {
-    const { user, accessToken, refreshToken } = await AuthService.signup(fullName, email, password);
+    const { user, accessToken, refreshToken } = await AuthService.signup(
+      parsed.data.fullName,
+      parsed.data.email,
+      parsed.data.password
+    );
+
     setRefreshCookie(res, refreshToken);
+
     return res.status(201).json({ user: toPublic(user), accessToken });
   } catch (err: any) {
     if (err?.message === "EMAIL_TAKEN") return res.status(409).json({ message: "Email already in use" });
@@ -41,13 +51,15 @@ export async function signup(req: Request, res: Response) {
 
 export async function login(req: Request, res: Response) {
   const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten() });
-
-  const { email, password } = parsed.data;
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten() });
+  }
 
   try {
-    const { user, accessToken, refreshToken } = await AuthService.login(email, password);
+    const { user, accessToken, refreshToken } = await AuthService.login(parsed.data.email, parsed.data.password);
+
     setRefreshCookie(res, refreshToken);
+
     return res.status(200).json({ user: toPublic(user), accessToken });
   } catch (err: any) {
     if (err?.message === "INVALID_CREDENTIALS") return res.status(401).json({ message: "Invalid credentials" });
@@ -55,13 +67,38 @@ export async function login(req: Request, res: Response) {
   }
 }
 
+/**
+ * POST /api/auth/refresh
+ * Reads refresh token from httpOnly cookie, rotates it, returns a new access token.
+ */
+export async function refresh(req: Request, res: Response) {
+  const token = req.cookies?.refreshToken as string | undefined;
+  if (!token) return res.status(401).json({ message: "Missing refresh token" });
+
+  try {
+    const { user, accessToken, refreshToken } = await AuthService.refresh(token);
+
+    // rotate refresh cookie
+    setRefreshCookie(res, refreshToken);
+
+    return res.status(200).json({ user: toPublic(user), accessToken });
+  } catch (err: any) {
+    // If refresh fails, clear cookie so client doesn't keep sending garbage
+    clearRefreshCookie(res);
+    return res.status(err?.status ?? 401).json({ message: "Invalid refresh token" });
+  }
+}
+
+/**
+ * POST /api/auth/logout
+ * Must be protected with requireAuth middleware.
+ */
 export async function logout(req: Request, res: Response) {
-  // If you have auth middleware, get userId from req.user. For now accept it from body (not ideal).
-  const userId = req.body?.userId as string | undefined;
-  if (!userId) return res.status(400).json({ message: "userId required" });
+  const userId = req.user?.sub;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   await AuthService.logout(userId);
 
-  res.clearCookie("refreshToken", { path: "/api/auth/refresh" });
+  clearRefreshCookie(res);
   return res.status(204).send();
 }

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js"
+import crypto from "crypto"
 
 export type AccessTokenPayload = {sub: string; email: string };
 export type RefreshTokenPayload = {sub: string; tokenVersion: number };
@@ -18,4 +19,8 @@ export function verifyAccessToken(token: string) {
 
 export function verifyRefreshToken(token: string) {
   return jwt.verify(token, env.JWT_REFRESH_SECRET) as RefreshTokenPayload;
+}
+
+export function hashRefreshToken(token: string) {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }

@@ -24,6 +24,11 @@ const userSchema = new Schema(
       type: Number,
       default: 0,
     },
+    refreshTokenHash: {
+      type: String,
+      select: false,
+      default: null,
+    },
   },
   {
     timestamps: true,
