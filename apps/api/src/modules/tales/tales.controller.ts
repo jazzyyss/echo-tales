@@ -22,6 +22,21 @@ function requireUserId(req: Request) {
   return userId;
 }
 
+export async function uploadImages(req: Request, res: Response){
+  try{
+    requireUserId(req);
+
+    if(!req.files || !Array.isArray(req.files)){
+      return res.status(400).json({message: "No images uploaded"});
+    }
+
+    const imgUrl = req.files.map(f => `/uploads/${f.filename}`);
+    return res.status(201).json({imgUrl});
+  }catch(err){
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
 export async function create(req: Request, res: Response) {
   try {
     const userId = requireUserId(req);

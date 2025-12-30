@@ -17,7 +17,7 @@ export async function createTale(userId: string, data: {
   story: string;
   visitedLocation: string[];
   isFav: boolean;
-  imgUrl: string;
+  imgUrl: string[];
   visitedDate: Date;
 }) {
   assertObjectId(userId);

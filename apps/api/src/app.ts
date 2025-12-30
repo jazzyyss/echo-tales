@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser";
+import path from "path";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { userRouter } from "./modules/user/user.routes.js";
 import { notFoundMiddleware } from "./middlewares/notfound.middleware.js";
@@ -13,6 +14,7 @@ const app = express();
 app.use(cors()); //enables cross-origin resource sharing
 app.use(express.json()); //Converts raw JSON → req.body e.g. email becomes req.body.email
 app.use(cookieParser());
+app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter); 
