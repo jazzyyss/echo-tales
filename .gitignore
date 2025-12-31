@@ -36,3 +36,6 @@ coverage/
 # Misc secrets
 *.pem
 *.key
+
+#multer
+apps/api/uploads/*

@@ -25,8 +25,7 @@ const taleSchema = new Schema({
   },
   imgUrl: {
     type: [String],
-    required: true,
-    default: []
+    required: true
   },
   visitedDate: {
     type: Date,
