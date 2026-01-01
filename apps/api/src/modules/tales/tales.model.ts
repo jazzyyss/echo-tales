@@ -23,7 +23,7 @@ const taleSchema = new Schema({
     type: Boolean,
     default: false
   },
-  imgUrl: {
+  imgUrls: {
     type: [String],
     required: true
   },

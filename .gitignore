@@ -39,3 +39,4 @@ coverage/
 
 #multer
 apps/api/uploads/*
+!apps/api/uploads/.gitkeep

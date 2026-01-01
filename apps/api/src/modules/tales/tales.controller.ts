@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import * as TaleService from "./tales.services.js";
 import { createTaleSchema, updateTaleSchema } from "./tales.validation.js";
+import path from "path";
+import { unlink } from "fs/promises";
 
 function statusFromError(err: unknown) {
   const anyErr = err as any;
@@ -30,9 +32,41 @@ export async function uploadImages(req: Request, res: Response){
       return res.status(400).json({message: "No images uploaded"});
     }
 
-    const imgUrl = req.files.map(f => `/uploads/${f.filename}`);
-    return res.status(201).json({imgUrl});
+    const imgUrls = req.files.map(f => `/uploads/${f.filename}`);
+    return res.status(201).json({imgUrls});
   }catch(err){
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
+function safeUploadsPathFromImgUrl(imgUrl: string) {
+  const filename = path.basename(imgUrl); // prevents path traversal like ../../
+  return path.resolve("uploads", filename);
+}
+
+export async function deleteImage(req: Request, res: Response) {
+  try {
+    const userId = req.user?.sub;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const taleId = req.params.id;
+    if (typeof taleId !== "string" || !taleId) {
+      return res.status(400).json({ message: "Invalid tale id" });
+    }
+    const imgUrl = String(req.body?.imgUrl ?? "").trim();
+    if (!imgUrl) return res.status(400).json({ message: "imgUrl required" });
+
+    await TaleService.removeImageFromTale(userId, taleId, imgUrl);
+
+    const filePath = safeUploadsPathFromImgUrl(imgUrl);
+    try {
+      await unlink(filePath);
+    } catch {
+      // No need to fail the request as DB is the source of truth now.
+    }
+
+    return res.status(204).send({message: "Image removed successful."});
+  } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
   }
 }

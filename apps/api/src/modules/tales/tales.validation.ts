@@ -10,7 +10,7 @@ export const createTaleSchema = z.object({
 
   isFav: z.boolean().optional().default(false),
 
-  imgUrl:  z.array(z.string().min(1)).min(1),
+  imgUrls:  z.array(z.string().min(1)).min(1),
 
   visitedDate: dateSchema,
 });

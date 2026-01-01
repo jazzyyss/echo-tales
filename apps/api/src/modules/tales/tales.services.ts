@@ -17,7 +17,7 @@ export async function createTale(userId: string, data: {
   story: string;
   visitedLocation: string[];
   isFav: boolean;
-  imgUrl: string[];
+  imgUrls: string[];
   visitedDate: Date;
 }) {
   assertObjectId(userId);
@@ -82,4 +82,23 @@ export async function toggleFav(userId: string, taleId: string) {
   await tale.save();
 
   return tale;
+}
+
+
+export async function removeImageFromTale(userId: string, taleId: string, imgUrl: string) {
+  assertObjectId(userId);
+  assertObjectId(taleId);
+
+  const tale = await TaleModel.findOne({ _id: taleId, owner: userId }).select("imgUrls");
+  if (!tale) throw httpError("TALE_NOT_FOUND", 404);
+
+  const exists = tale.imgUrls.includes(imgUrl);
+  if (!exists) throw httpError("IMAGE_NOT_FOUND_ON_TALE", 404);
+
+  await TaleModel.updateOne(
+    { _id: taleId, owner: userId },
+    { $pull: { imgUrls: imgUrl } }
+  );
+
+  return { imgUrl };
 }
