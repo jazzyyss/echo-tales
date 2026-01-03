@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="TE App Icon">
+  <!-- Background -->
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#2563EB"/>
+
+  <!-- TE text -->
+  <text
+    x="64"
+    y="70"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    font-size="56"
+    font-weight="800"
+    font-style="italic"
+    letter-spacing="-2"
+    fill="#FFFFFF">
+    TE
+  </text>
+</svg>
