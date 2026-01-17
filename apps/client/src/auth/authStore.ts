@@ -5,6 +5,8 @@ export type Me = {
   id: string;
   fullName: string;
   email: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type AuthState = {
@@ -17,6 +19,7 @@ type AuthState = {
   reset: () => void;
 
   bootstrap: () => Promise<void>;
+  signup: (fullName: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -41,16 +44,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // 1) Refresh -> new access token (cookie-based)
       const refreshRes = await http.post("/auth/refresh");
       const accessToken = (refreshRes.data as any)?.accessToken as string | undefined;
+      const me = (refreshRes.data as any)?.user as Me | undefined;
+
       if (!accessToken) throw new Error("Refresh did not return accessToken");
+      if (!me?.email) throw new Error("Invalid user response");
 
-      set({ accessToken });
+      set({ accessToken, me, isBootstrapping: false });
 
-      // 2) Get user
-      const meRes = await http.get("/users/me");
-      const me = meRes.data as Me;
-      if (!me?.email) throw new Error("Invalid /users/me response");
-
-      set({ me, isBootstrapping: false });
     } catch {
       // Not logged in or refresh invalid
       set({ accessToken: null, me: null, isBootstrapping: false });
@@ -59,22 +59,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email, password) => {
     try{
-      // 1) Login -> returns access token + sets refresh cookie
+      // 1) Login -> returns access token+ user + sets refresh cookie
       const res = await http.post("/auth/login", { email, password });
+      
       const accessToken = (res.data as any)?.accessToken as string | undefined;
-      if (!accessToken) throw new Error("Login failed: accessToken missing");
+      const user = (res.data as any)?.user as Me | undefined;
 
-      set({ accessToken });
+      if (!accessToken || !user?.email) {
+        throw new Error("Login failed: invalid response");
+      }
 
-      // 2) Hydrate user
-      const meRes = await http.get("/users/me");
-      const me = meRes.data as Me;
-      if (!me?.email) throw new Error("Invalid /users/me response");
-
-      set({ me });
+      set({ accessToken, me: user });
     }catch(err){
       set({accessToken: null, me: null})
       throw err
+    }
+  },
+
+  signup: async (fullName, email, password) => {
+    try {
+      const res = await http.post("/auth/signup", { fullName, email, password });
+      const accessToken = (res.data as any)?.accessToken as string | undefined;
+      const user = (res.data as any)?.user as Me | undefined;
+
+      if (!accessToken || !user?.email) throw new Error("Signup failed: invalid response");
+
+      set({ accessToken, me: user });
+    } catch (err) {
+      set({ accessToken: null, me: null });
+      throw err;
     }
   },
 

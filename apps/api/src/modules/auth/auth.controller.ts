@@ -14,8 +14,14 @@ function setRefreshCookie(res: Response, token: string) {
 }
 
 function clearRefreshCookie(res: Response) {
-  res.clearCookie("refreshToken", { path: "/api/auth/refresh" });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: env.COOKIE_SECURE, // MUST match setRefreshCookie
+    sameSite: "lax",
+    path: "/api/auth/refresh",
+  });
 }
+
 
 function toPublic(user: { _id: unknown; fullName: string; email: string; createdAt: Date; updatedAt: Date }) {
   return {

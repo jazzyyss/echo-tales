@@ -11,13 +11,20 @@ import { taleRouter } from "./modules/tales/tales.routes.js";
 
 const app = express();
 
-app.use(cors()); //enables cross-origin resource sharing
+//app.use(cors()); //enables cross-origin resource sharing
+//when using credentials true specify origin
+app.use(
+  cors({
+    origin: ["http://localhost:5173"], // Vite dev origin
+    credentials: true,
+  })
+);
 app.use(express.json()); //Converts raw JSON → req.body e.g. email becomes req.body.email
 app.use(cookieParser());
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter); 
+app.use("/api/users", userRouter); 
 app.use("/api/tale", requireAuth, taleRouter);
 
 app.get("/health", (_req, res)=>{
