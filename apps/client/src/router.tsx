@@ -3,10 +3,10 @@ import AppShell from "./app/AppShell";
 import { RequireAuth } from "./app/RequireAuth";
 import { RequireGuest } from "./app/RequireGuest";
 
-import Home from "./pages/home/Home";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 import NotFound from "./pages/not-found/NotFound";
+import TalesPage from "./pages/tales/TalesPage";
 
 export const router = createBrowserRouter([
   {
@@ -18,7 +18,7 @@ export const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <RequireAuth>
-            <Home />
+            <TalesPage />
           </RequireAuth>
         ),
       },

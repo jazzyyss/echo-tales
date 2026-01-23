@@ -4,11 +4,11 @@ import { upload } from "../../lib/upload.js";
 
 export const taleRouter = Router();
 
+taleRouter.post("/upload", upload.array("images", 10), TaleController.uploadImages);
 taleRouter.post("/", TaleController.create);
 taleRouter.get("/", TaleController.list);
+taleRouter.patch("/:id/toggle-fav", TaleController.toggleFav);
+taleRouter.delete("/:id/images", TaleController.deleteImage);
 taleRouter.get("/:id", TaleController.getById);
 taleRouter.patch("/:id", TaleController.update);
 taleRouter.delete("/:id", TaleController.remove);
-taleRouter.patch("/:id/toggle-fav", TaleController.toggleFav);
-taleRouter.post("/upload", upload.array("images", 10), TaleController.uploadImages);
-taleRouter.delete("/:id/images", TaleController.deleteImage);

@@ -22,7 +22,6 @@ export async function createTale(userId: string, data: {
 }) {
   assertObjectId(userId);
 
-  console.log(userId, data)
   return TaleModel.create({
     owner: userId,
     ...data,

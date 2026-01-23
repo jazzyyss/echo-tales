@@ -25,7 +25,7 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter); 
-app.use("/api/tale", requireAuth, taleRouter);
+app.use("/api/tales", requireAuth, taleRouter);
 
 app.get("/health", (_req, res)=>{
   res.json({status: "ok"});

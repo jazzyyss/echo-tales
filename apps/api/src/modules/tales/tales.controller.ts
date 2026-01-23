@@ -65,7 +65,7 @@ export async function deleteImage(req: Request, res: Response) {
       // No need to fail the request as DB is the source of truth now.
     }
 
-    return res.status(204).send({message: "Image removed successful."});
+    return res.status(204).send();
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
   }

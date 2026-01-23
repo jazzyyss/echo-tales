@@ -76,12 +76,12 @@ const SignUp: FC = () => {
       <div className="login-ui-box bg-cyan-200 -bottom-40 right-1/2 hidden lg:block"></div>
 
       <div className="container h-screen flex flex-wrap items-center justify-center px-4 sm:px-8 lg:-48 mx-auto">
-        <div className="w-full lg:w-2/4 h-[40vh] lg:h-[90vh] flex items-end bg-login-bg-img bg-cover bg-center rounded-lg p-5 lg:p-10 z-50 mb-4 lg:mb-0">
+        <div className="w-full lg:w-2/4 h-[40vh] lg:h-[90vh] flex items-end bg-login-bg-img bg-cover bg-bottom rounded-lg p-5 lg:p-10 z-50 mb-4 lg:mb-0">
           <div>
-            <h4 className="text-3xl lg:text-5xl text-white font-semibold leading-tight lg:leading-14.5">
+            <h4 className="text-3xl lg:text-5xl text-blue drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)] font-semibold leading-tight lg:leading-14.5">
               Join Tales!
             </h4>
-            <p className="text-sm lg:text-[15px] text-white leading-5 lg:leading-6 mt-2 lg:mt-4 pr-3 lg:pr-7">
+            <p className="text-sm lg:text-[15px] text-blue drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)] leading-5 lg:leading-6 mt-2 lg:mt-4 pr-3 lg:pr-7">
               Create an account to save your travel stories and memories.
             </p>
           </div>
