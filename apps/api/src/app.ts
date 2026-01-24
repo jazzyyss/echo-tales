@@ -8,14 +8,14 @@ import { notFoundMiddleware } from "./middlewares/notfound.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import { requireAuth } from "./middlewares/auth.middleware.js";
 import { taleRouter } from "./modules/tales/tales.routes.js";
+import { env } from "../src/config/env.js";
 
 const app = express();
 
-//app.use(cors()); //enables cross-origin resource sharing
 //when using credentials true specify origin
 app.use(
   cors({
-    origin: ["http://localhost:5173"], // Vite dev origin
+    origin: [`${env.CORS_ORIGIN}`], // Vite dev origin
     credentials: true,
   })
 );
