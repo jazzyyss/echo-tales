@@ -42,7 +42,7 @@ export default function Navbar({ searchQuery, setSearchQuery, onSearch, onClearS
     <nav className="bg-white sticky top-0 z-50 border-b">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
-          <div className="flex items-center font-semibold text-slate-900">Tales</div>
+          <div className="flex items-center font-semibold text-slate-900">Tales<span className="text-blue-400">Echo</span></div>
 
           {authed && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -1,5 +1,5 @@
 import moment from "moment";
-import { FaHeart } from "react-icons/fa";
+//import { FaHeart } from "react-icons/fa";
 import { GrMapLocation } from "react-icons/gr";
 
 export default function TravelStoryCard({
@@ -25,13 +25,13 @@ export default function TravelStoryCard({
     <div className="border rounded-lg overflow-hidden bg-white hover:shadow-lg hover:shadow-slate-200 transition-all relative cursor-pointer">
       <img src={imgUrl} alt={title} className="w-full h-56 object-cover" onClick={onClick} />
 
-      <button
+      {/* <button
         className="w-10 h-10 flex items-center justify-center bg-white/40 rounded-lg border border-white/30 absolute top-4 right-4"
         onClick={onFavoriteToggle}
         aria-label="Toggle Favorite"
       >
         <FaHeart className={isFavorite ? "text-red-500" : "text-white"} />
-      </button>
+      </button> */}
 
       <div className="p-4" onClick={onClick}>
         <h6 className="text-sm font-medium">{title}</h6>

@@ -63,11 +63,11 @@ export default function TaleAddModal({
 
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-slate-600">TITLE</label>
+          <label className="text-xs font-semibold text-slate-600">Title</label>
           <input
             type="text"
-            className="text-xl sm:text-2xl text-slate-950 outline-none w-full p-2 bg-slate-50 rounded"
-            placeholder="A day in Tokyo"
+            className="text-xl sm:text-lg text-slate-950 outline-none w-full p-2 bg-slate-50 rounded"
+            placeholder="Your title..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -86,9 +86,9 @@ export default function TaleAddModal({
         <ImageSelector images={images} setImages={setImages} />
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-slate-600">STORY</label>
+          <label className="text-xs font-semibold text-slate-600">Story</label>
           <textarea
-            className="text-sm text-slate-950 outline-none bg-slate-50 p-4 rounded min-h-[200px] w-full"
+            className="text-sm text-slate-950 outline-none bg-slate-50 p-4 rounded min-h-[100px] w-full"
             placeholder="Your story..."
             value={story}
             onChange={(e) => setStory(e.target.value)}
@@ -109,7 +109,7 @@ export default function TaleAddModal({
           disabled={saving}
         >
           <span className="inline-flex items-center gap-2">
-            <MdAdd className="text-lg" /> CREATE TALE
+            Create
           </span>
         </button>
       </div>

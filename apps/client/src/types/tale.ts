@@ -1,5 +1,10 @@
 export type Tale = {
   id: string;
+  owner: {
+    _id: string,
+    fullName: string,
+    username: string
+  }
   title: string;
   story: string;
   visitedLocation: string[];
@@ -7,3 +12,4 @@ export type Tale = {
   isFav: boolean;
   imgUrls: string[];
 };
+

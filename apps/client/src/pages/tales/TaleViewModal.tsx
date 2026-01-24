@@ -4,6 +4,7 @@ import { MdClose, MdDeleteOutline } from "react-icons/md";
 import "react-day-picker/dist/style.css";
 import type { Tale } from "../../types/tale";
 import * as env from "../../utils/env";
+import { useAuthStore } from "../../auth/authStore";
 
 export default function TaleViewModal({
   tale,
@@ -16,14 +17,18 @@ export default function TaleViewModal({
 }) {
   if (!tale) return null;
 
+  const user = useAuthStore(s => s.me);
+
   return (
     <div className="relative max-w-full">
-      <div className="flex items-center justify-end mb-2">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-cyan-50/50 p-2 rounded-l-lg">
-          <button className="btn-small btn-delete text-xs sm:text-sm flex items-center gap-1" onClick={onDelete}>
+          <span>{tale.owner.username}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-cyan-50/50 p-2 rounded-l-lg">
+          {(tale.owner.username === user?.username) && <button className="btn-small btn-delete text-xs sm:text-sm flex items-center gap-1" onClick={onDelete}>
             <MdDeleteOutline className="text-base sm:text-lg" />
-            <span>DELETE</span>
-          </button>
+          </button>}
           <button className="p-1" onClick={onClose} aria-label="Close">
             <MdClose className="text-lg sm:text-xl text-slate-400" />
           </button>

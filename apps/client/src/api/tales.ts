@@ -3,7 +3,11 @@ import type { Tale } from "../types/tale";
 
 type TaleDto = {
   _id: string;
-  owner: string;
+  owner: {
+    _id: string,
+    fullName: string,
+    username: string
+  };
   title: string;
   story: string;
   visitedLocation: string[];
@@ -16,6 +20,7 @@ type TaleDto = {
 
 const mapTale = (dto: TaleDto): Tale => ({
   id: dto._id,
+  owner: dto.owner,
   title: dto.title,
   story: dto.story,
   visitedLocation: dto.visitedLocation ?? [],

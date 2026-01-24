@@ -35,18 +35,25 @@ async function issueTokens(user: { _id: any; email: string; tokenVersion: number
   return { accessToken, refreshToken };
 }
 
-export async function signup(fullName: string, email: string, password: string) {
+export async function signup(fullName: string, username: string, email: string, password: string) {
+  
+  const existingEmail = await UserModel.findOne({ email });
+  if (existingEmail) throw new Error("EMAIL_TAKEN");
+
+  const existingUsername = await UserModel.findOne({ username });
+  if (existingUsername) throw new Error("USERNAME_TAKEN");
+  
   const passwordHash = await hashPassword(password);
 
   try {
-    const user = await UserModel.create({ fullName, email, password: passwordHash });
+    const user = await UserModel.create({ fullName, username, email, password: passwordHash });
 
     const { accessToken, refreshToken } = await issueTokens(user);
 
     return { user, accessToken, refreshToken };
   } catch (err) {
     if (isDupKey(err)) {
-      const e = new Error("EMAIL_TAKEN");
+      const e = new Error("EMAIL/USERNAME_TAKEN");
       (e as any).status = 409;
       throw e;
     }

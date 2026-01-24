@@ -23,10 +23,11 @@ function clearRefreshCookie(res: Response) {
 }
 
 
-function toPublic(user: { _id: unknown; fullName: string; email: string; createdAt: Date; updatedAt: Date }) {
+function toPublic(user: { _id: unknown; fullName: string; username: string; email: string; createdAt: Date; updatedAt: Date }) {
   return {
     id: String(user._id),
     fullName: user.fullName,
+    username: user.username,
     email: user.email,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -42,6 +43,7 @@ export async function signup(req: Request, res: Response) {
   try {
     const { user, accessToken, refreshToken } = await AuthService.signup(
       parsed.data.fullName,
+      parsed.data.username,
       parsed.data.email,
       parsed.data.password
     );
@@ -51,6 +53,7 @@ export async function signup(req: Request, res: Response) {
     return res.status(201).json({ user: toPublic(user), accessToken });
   } catch (err: any) {
     if (err?.message === "EMAIL_TAKEN") return res.status(409).json({ message: "Email already in use" });
+    if (err?.message === "USERNAME_TAKEN") return res.status(409).json({ message: "Username already in use" });
     return res.status(err?.status ?? 500).json({ message: "Server error" });
   }
 }

@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
-import { TaleModel } from "./tales.model.js";
-import type { Tale } from "./tales.model.js";
+import { TaleModel, type Tale } from "./tales.model.js";
 
 function httpError(message: string, status: number) {
   const e = new Error(message) as Error & { status?: number };
@@ -28,10 +27,10 @@ export async function createTale(userId: string, data: {
   });
 }
 
-export async function listTales(userId: string) {
-  assertObjectId(userId);
+export async function listTales() {
+  //assertObjectId(userId);
 
-  return TaleModel.find({ owner: userId }).sort({ createdAt: -1 });
+  return TaleModel.find({visibility: "public"}).populate("owner","username fullName").sort({ createdAt: -1 });
 }
 
 export async function getTaleById(userId: string, taleId: string) {

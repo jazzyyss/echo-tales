@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import { DayPicker } from "react-day-picker";
 import { MdAdd, MdCalendarMonth, MdClose } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
+import * as env from "../../utils/env";
 import "react-toastify/dist/ReactToastify.css";
 
 import type { Tale } from "../../types/tale";
@@ -174,7 +175,7 @@ export default function TalesPage() {
                 {filtered.map((t) => (
                   <TravelStoryCard
                     key={t.id}
-                    imgUrl={t.imgUrls?.[0] ?? ""}
+                    imgUrl={t.imgUrls?.[0] ? env.API_URL.replace("/api", "")+t.imgUrls?.[0] : ""}
                     title={t.title}
                     story={t.story}
                     date={t.visitedDate}

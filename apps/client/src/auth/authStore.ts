@@ -4,6 +4,7 @@ import { http } from "../api/http";
 export type Me = {
   id: string;
   fullName: string;
+  username: string;
   email: string;
   createdAt: string;
   updatedAt: string;
@@ -19,7 +20,7 @@ type AuthState = {
   reset: () => void;
 
   bootstrap: () => Promise<void>;
-  signup: (fullName: string, email: string, password: string) => Promise<void>;
+  signup: (fullName: string, username: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -76,9 +77,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signup: async (fullName, email, password) => {
+  signup: async (fullName, username, email, password) => {
     try {
-      const res = await http.post("/auth/signup", { fullName, email, password });
+      const res = await http.post("/auth/signup", { fullName, username, email, password });
       const accessToken = (res.data as any)?.accessToken as string | undefined;
       const user = (res.data as any)?.user as Me | undefined;
 

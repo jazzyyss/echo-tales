@@ -89,8 +89,8 @@ export async function create(req: Request, res: Response) {
 
 export async function list(req: Request, res: Response) {
   try {
-    const userId = requireUserId(req);
-    const tales = await TaleService.listTales(userId);
+    //const userId = requireUserId(req);
+    const tales = await TaleService.listTales(); //TaleService.listTales(userId);
     return res.status(200).json({ tales });
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });

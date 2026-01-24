@@ -7,6 +7,12 @@ const taleSchema = new Schema({
     required: true, 
     index: true 
   },
+  visibility: {
+    type: String,
+    enum: ["private", "public", "unlisted"],
+    default: "private",
+    index: true,
+  },
   title: {
     type: String,
     required: true
