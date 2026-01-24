@@ -8,7 +8,7 @@ import { notFoundMiddleware } from "./middlewares/notfound.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import { requireAuth } from "./middlewares/auth.middleware.js";
 import { taleRouter } from "./modules/tales/tales.routes.js";
-import { env } from "../src/config/env.js";
+import { env } from "./config/env.js";
 
 const app = express();
 
