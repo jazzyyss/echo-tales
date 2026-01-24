@@ -8,9 +8,9 @@ export default function TravelStoryCard({
   date,
   story,
   visitedLocation,
-  _isFavorite,
+  isFavorite,
   onClick,
-  _onFavoriteToggle,
+  onFavoriteToggle,
 }: {
   imgUrl: string;
   title: string;
@@ -21,7 +21,12 @@ export default function TravelStoryCard({
   onClick: () => void;
   onFavoriteToggle: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
+
+  void isFavorite;
+  void onFavoriteToggle;
+
   return (
+    
     <div className="border rounded-lg overflow-hidden bg-white hover:shadow-lg hover:shadow-slate-200 transition-all relative cursor-pointer">
       <img src={imgUrl} alt={title} className="w-full h-56 object-cover" onClick={onClick} />
 
