@@ -8,9 +8,9 @@ export default function TravelStoryCard({
   date,
   story,
   visitedLocation,
-  isFavorite,
+  _isFavorite,
   onClick,
-  onFavoriteToggle,
+  _onFavoriteToggle,
 }: {
   imgUrl: string;
   title: string;

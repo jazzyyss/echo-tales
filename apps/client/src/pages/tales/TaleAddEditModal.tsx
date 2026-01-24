@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import moment from "moment";
-import { MdAdd, MdClose } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
 
 import { createTale } from "../../api/tales";
