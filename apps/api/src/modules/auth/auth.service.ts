@@ -28,8 +28,8 @@ async function issueTokens(user: { _id: any; email: string; tokenVersion: number
     tokenVersion: user.tokenVersion,
   });
 
-  // Store hash (NOT the raw token) for rotation / replay protection
   const refreshTokenHash = hashRefreshToken(refreshToken);
+
   await UserModel.updateOne({ _id: userId }, { $set: { refreshTokenHash } });
 
   return { accessToken, refreshToken };

@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isBootstrapping: true, me: null });
 
     try {
-      // 1) Refresh -> new access token (cookie-based)
+      // Refresh -> new access token (cookie-based)
       const refreshRes = await http.post("/auth/refresh");
       const accessToken = (refreshRes.data as any)?.accessToken as string | undefined;
       const me = (refreshRes.data as any)?.user as Me | undefined;
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email, password) => {
     try{
-      // 1) Login -> returns access token+ user + sets refresh cookie
+      // Login -> returns access token+ user + sets refresh cookie
       const res = await http.post("/auth/login", { email, password });
       
       const accessToken = (res.data as any)?.accessToken as string | undefined;

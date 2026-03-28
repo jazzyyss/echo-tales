@@ -17,7 +17,7 @@ function clearRefreshCookie(res: Response) {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: env.COOKIE_SECURE, // MUST match setRefreshCookie
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api/auth/refresh",
   });
 }
@@ -86,10 +86,8 @@ export async function refresh(req: Request, res: Response) {
 
   try {
     const { user, accessToken, refreshToken } = await AuthService.refresh(token);
-
-    // rotate refresh cookie
     setRefreshCookie(res, refreshToken);
-
+    
     return res.status(200).json({ user: toPublic(user), accessToken });
   } catch (err: any) {
     // If refresh fails, clear cookie so client doesn't keep sending garbage
