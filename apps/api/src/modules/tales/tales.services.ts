@@ -14,9 +14,18 @@ function assertObjectId(id: string) {
 export async function createTale(userId: string, data: {
   title: string;
   story: string;
+  visibility?: "private" | "public" | "unlisted";
   visitedLocation: string[];
   isFav: boolean;
-  imgUrls: string[];
+  images: {
+      publicId: string;
+      secureUrl: string;
+      width?: number | null | undefined;
+      height?: number | null | undefined;
+      format?: string | null | undefined;
+      bytes?: number | null | undefined;
+      uploadedAt?: Date | undefined;
+    }[];
   visitedDate: Date;
 }) {
   assertObjectId(userId);
@@ -28,8 +37,6 @@ export async function createTale(userId: string, data: {
 }
 
 export async function listTales() {
-  //assertObjectId(userId);
-
   return TaleModel.find({visibility: "public"}).populate("owner","username fullName").sort({ createdAt: -1 });
 }
 
@@ -41,6 +48,13 @@ export async function getTaleById(userId: string, taleId: string) {
   if (!tale) throw httpError("TALE_NOT_FOUND", 404);
 
   return tale;
+}
+
+export async function getByUser(userId: string){
+  assertObjectId(userId);
+  const tales = await TaleModel.find({owner: userId});
+  if (!tales) throw httpError("TALES_NOT_FOUND", 404);
+  return tales;
 }
 
 export async function updateTale(userId: string, taleId: string, updates: Partial<Tale>) {
@@ -67,6 +81,8 @@ export async function deleteTale(userId: string, taleId: string) {
 
   const deleted = await TaleModel.findOneAndDelete({ _id: taleId, owner: userId });
   if (!deleted) throw httpError("TALE_NOT_FOUND", 404);
+
+  return deleted;
 }
 
 export async function toggleFav(userId: string, taleId: string) {
@@ -82,21 +98,20 @@ export async function toggleFav(userId: string, taleId: string) {
   return tale;
 }
 
-
-export async function removeImageFromTale(userId: string, taleId: string, imgUrl: string) {
+export async function removeImageFromTale(userId: string, taleId: string, publicId: string) {
   assertObjectId(userId);
   assertObjectId(taleId);
 
-  const tale = await TaleModel.findOne({ _id: taleId, owner: userId }).select("imgUrls");
+  const tale = await TaleModel.findOne({ _id: taleId, owner: userId }).select("images");
   if (!tale) throw httpError("TALE_NOT_FOUND", 404);
 
-  const exists = tale.imgUrls.includes(imgUrl);
-  if (!exists) throw httpError("IMAGE_NOT_FOUND_ON_TALE", 404);
+  const image = tale.images.find((img: any) => img.publicId === publicId);
+  if (!image) throw httpError("IMAGE_NOT_FOUND_ON_TALE", 404);
 
   await TaleModel.updateOne(
     { _id: taleId, owner: userId },
-    { $pull: { imgUrls: imgUrl } }
+    { $pull: { images: { publicId } } }
   );
 
-  return { imgUrl };
+  return image;
 }

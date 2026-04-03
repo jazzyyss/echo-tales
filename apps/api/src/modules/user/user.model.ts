@@ -1,5 +1,39 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
+const userImageSchema = new Schema(
+  {
+    publicId: {
+      type: String,
+      default: null,
+    },
+    secureUrl: {
+      type: String,
+      default: null,
+    },
+    width: {
+      type: Number,
+      default: null,
+    },
+    height: {
+      type: Number,
+      default: null,
+    },
+    format: {
+      type: String,
+      default: null,
+    },
+    bytes: {
+      type: Number,
+      default: null,
+    },
+    uploadedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = new Schema(
   {
     fullName: {
@@ -11,19 +45,16 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
       trim: true,
-      lowercase: true,
-      minlength: 3,
-      maxlength: 20,
+      index: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
-      index: true,
       lowercase: true,
-      trim: true
+      trim: true,
+      index: true,
     },
     password: {
       type: String,
@@ -36,8 +67,39 @@ const userSchema = new Schema(
     },
     refreshTokenHash: {
       type: String,
-      select: false,
       default: null,
+      select: false,
+    },
+
+    media: {
+      type: new Schema(
+        {
+          profilePicture: {
+            type: userImageSchema,
+            default: () => ({
+              publicId: null,
+              secureUrl: null,
+              width: null,
+              height: null,
+              format: null,
+              bytes: null,
+              uploadedAt: null,
+            }),
+          },
+        },
+        { _id: false }
+      ),
+      default: () => ({
+        profilePicture: {
+          publicId: null,
+          secureUrl: null,
+          width: null,
+          height: null,
+          format: null,
+          bytes: null,
+          uploadedAt: null,
+        },
+      }),
     },
   },
   {
@@ -47,5 +109,4 @@ const userSchema = new Schema(
 );
 
 export type User = InferSchemaType<typeof userSchema>;
-
 export const UserModel = model<User>("User", userSchema);

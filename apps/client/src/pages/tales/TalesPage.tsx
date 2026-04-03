@@ -4,7 +4,6 @@ import Modal from "react-modal";
 import { DayPicker } from "react-day-picker";
 import { MdAdd, MdCalendarMonth, MdClose } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
-import * as env from "../../utils/env";
 import "react-toastify/dist/ReactToastify.css";
 
 import type { Tale } from "../../types/tale";
@@ -49,13 +48,14 @@ export default function TalesPage() {
   };
 
   useEffect(() => {
-    load();
+    void load();
   }, []);
 
   const filtered = useMemo(() => {
     if (filterType === "search") {
       const q = searchQuery.trim().toLowerCase();
       if (!q) return tales;
+
       return tales.filter((t) => {
         const blob = `${t.title} ${t.story} ${t.visitedLocation.join(" ")}`.toLowerCase();
         return blob.includes(q);
@@ -65,6 +65,7 @@ export default function TalesPage() {
     if (filterType === "date" && dateRange.from && dateRange.to) {
       const start = moment(dateRange.from).startOf("day").valueOf();
       const end = moment(dateRange.to).endOf("day").valueOf();
+
       return tales.filter((t) => {
         const d = moment(t.visitedDate).valueOf();
         return d >= start && d <= end;
@@ -98,6 +99,7 @@ export default function TalesPage() {
 
   const handleFavToggle = async (t: Tale, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+
     try {
       const updated = await toggleFav(t.id);
       setTales((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
@@ -120,7 +122,12 @@ export default function TalesPage() {
 
   return (
     <>
-      <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSearch={onSearch} onClearSearch={clearSearch} />
+      <Navbar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSearch={onSearch}
+        onClearSearch={clearSearch}
+      />
 
       <div className="container mx-auto py-4 sm:py-6 md:py-10 px-4 sm:px-6">
         <FilterInfoTitle filterType={filterType} filterDates={dateRange} onClear={resetFilter} />
@@ -175,7 +182,7 @@ export default function TalesPage() {
                 {filtered.map((t) => (
                   <TravelStoryCard
                     key={t.id}
-                    imgUrl={t.imgUrls?.[0] ? env.API_URL.replace("/api", "")+t.imgUrls?.[0] : ""}
+                    imgUrl={t.images?.[0]?.secureUrl ?? ""}
                     title={t.title}
                     story={t.story}
                     date={t.visitedDate}
@@ -213,8 +220,26 @@ export default function TalesPage() {
         appElement={document.getElementById("root") as HTMLElement}
         className="model-box"
         style={{
-          overlay: { backgroundColor: "rgba(0, 0, 0, 0.2)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" },
-          content: { position: "relative", inset: "auto", maxWidth: "90vw", width: "600px", maxHeight: "90vh", margin: "20px", overflow: "auto", padding: "20px", borderRadius: "8px", background: "#fff", border: "1px solid #ccc" },
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+            zIndex: 999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          content: {
+            position: "relative",
+            inset: "auto",
+            maxWidth: "90vw",
+            width: "600px",
+            maxHeight: "90vh",
+            margin: "20px",
+            overflow: "auto",
+            padding: "20px",
+            borderRadius: "8px",
+            background: "#fff",
+            border: "1px solid #ccc",
+          },
         }}
       >
         <TaleAddModal onClose={() => setOpenAdd(false)} onSaved={load} />
@@ -226,8 +251,26 @@ export default function TalesPage() {
         appElement={document.getElementById("root") as HTMLElement}
         className="model-box"
         style={{
-          overlay: { backgroundColor: "rgba(0, 0, 0, 0.2)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" },
-          content: { position: "relative", inset: "auto", maxWidth: "90vw", width: "600px", maxHeight: "90vh", margin: "20px", overflow: "auto", padding: "20px", borderRadius: "8px", background: "#fff", border: "1px solid #ccc" },
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+            zIndex: 999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          content: {
+            position: "relative",
+            inset: "auto",
+            maxWidth: "90vw",
+            width: "700px",
+            maxHeight: "90vh",
+            margin: "20px",
+            overflow: "auto",
+            padding: "20px",
+            borderRadius: "8px",
+            background: "#fff",
+            border: "1px solid #ccc",
+          },
         }}
       >
         <TaleViewModal

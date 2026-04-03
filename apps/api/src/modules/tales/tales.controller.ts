@@ -1,8 +1,10 @@
 import type { Request, Response } from "express";
 import * as TaleService from "./tales.services.js";
 import { createTaleSchema, updateTaleSchema } from "./tales.validation.js";
-import path from "path";
-import { unlink } from "fs/promises";
+import {
+  uploadImageBuffer,
+  deleteImageByPublicId,
+} from "../../lib/cloudinary-upload.js";
 
 function statusFromError(err: unknown) {
   const anyErr = err as any;
@@ -24,45 +26,44 @@ function requireUserId(req: Request) {
   return userId;
 }
 
-export async function uploadImages(req: Request, res: Response){
-  try{
+export async function uploadImages(req: Request, res: Response) {
+  try {
     requireUserId(req);
 
-    if(!req.files || !Array.isArray(req.files)){
-      return res.status(400).json({message: "No images uploaded"});
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+      return res.status(400).json({ message: "No images uploaded" });
     }
 
-    const imgUrls = req.files.map(f => `/uploads/${f.filename}`);
-    return res.status(201).json({imgUrls});
-  }catch(err){
+    const uploads = await Promise.all(
+      req.files.map((file) => uploadImageBuffer(file, "tales"))
+    );
+
+    return res.status(201).json({ images: uploads });
+  } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
   }
 }
 
-function safeUploadsPathFromImgUrl(imgUrl: string) {
-  const filename = path.basename(imgUrl); // prevents path traversal like ../../
-  return path.resolve("uploads", filename);
-}
-
 export async function deleteImage(req: Request, res: Response) {
   try {
-    const userId = req.user?.sub;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const userId = requireUserId(req);
 
     const taleId = req.params.id;
     if (typeof taleId !== "string" || !taleId) {
       return res.status(400).json({ message: "Invalid tale id" });
     }
-    const imgUrl = String(req.body?.imgUrl ?? "").trim();
-    if (!imgUrl) return res.status(400).json({ message: "imgUrl required" });
 
-    await TaleService.removeImageFromTale(userId, taleId, imgUrl);
+    const publicId = String(req.body?.publicId ?? "").trim();
+    if (!publicId) {
+      return res.status(400).json({ message: "publicId required" });
+    }
 
-    const filePath = safeUploadsPathFromImgUrl(imgUrl);
+    await TaleService.removeImageFromTale(userId, taleId, publicId);
+
     try {
-      await unlink(filePath);
+      await deleteImageByPublicId(publicId);
     } catch {
-      // No need to fail the request as DB is the source of truth now.
+      // DB stays source of truth
     }
 
     return res.status(204).send();
@@ -77,7 +78,10 @@ export async function create(req: Request, res: Response) {
 
     const parsed = createTaleSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten() });
+      return res.status(400).json({
+        message: "Invalid input",
+        errors: parsed.error.flatten(),
+      });
     }
 
     const tale = await TaleService.createTale(userId, parsed.data);
@@ -89,8 +93,7 @@ export async function create(req: Request, res: Response) {
 
 export async function list(req: Request, res: Response) {
   try {
-    //const userId = requireUserId(req);
-    const tales = await TaleService.listTales(); //TaleService.listTales(userId);
+    const tales = await TaleService.listTales();
     return res.status(200).json({ tales });
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
@@ -113,10 +116,18 @@ export async function update(req: Request, res: Response) {
 
     const parsed = updateTaleSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten() });
+      return res.status(400).json({
+        message: "Invalid input",
+        errors: parsed.error.flatten(),
+      });
     }
 
-    const tale = await TaleService.updateTale(userId, req.params.id as string, parsed.data as any);
+    const tale = await TaleService.updateTale(
+      userId,
+      req.params.id as string,
+      parsed.data as any
+    );
+
     return res.status(200).json({ tale });
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
@@ -126,7 +137,16 @@ export async function update(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   try {
     const userId = requireUserId(req);
-    await TaleService.deleteTale(userId, req.params.id as string);
+    const deleted = await TaleService.deleteTale(userId, req.params.id as string);
+
+    try {
+      await Promise.all(
+        (deleted.images ?? []).map((img: any) => deleteImageByPublicId(img.publicId))
+      );
+    } catch {
+      // DB still source of truth
+    }
+
     return res.status(204).send();
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });

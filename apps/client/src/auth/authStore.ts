@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { http } from "../api/http";
+import type { ProfilePicture } from "../types/media";
 
 export type Me = {
   id: string;
@@ -8,6 +9,9 @@ export type Me = {
   email: string;
   createdAt: string;
   updatedAt: string;
+  media: {
+    profilePicture: ProfilePicture;
+  };
 };
 
 type AuthState = {
@@ -36,13 +40,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   reset: () => set({ accessToken: null, me: null, isBootstrapping: false }),
 
   bootstrap: async () => {
-    // Prevent double bootstrap
     if (get().isBootstrapping === false && get().accessToken) return;
 
     set({ isBootstrapping: true, me: null });
 
     try {
-      // Refresh -> new access token (cookie-based)
       const refreshRes = await http.post("/auth/refresh");
       const accessToken = (refreshRes.data as any)?.accessToken as string | undefined;
       const me = (refreshRes.data as any)?.user as Me | undefined;
@@ -51,18 +53,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (!me?.email) throw new Error("Invalid user response");
 
       set({ accessToken, me, isBootstrapping: false });
-
     } catch {
-      // Not logged in or refresh invalid
       set({ accessToken: null, me: null, isBootstrapping: false });
     }
   },
 
   login: async (email, password) => {
-    try{
-      // Login -> returns access token+ user + sets refresh cookie
+    try {
       const res = await http.post("/auth/login", { email, password });
-      
+
       const accessToken = (res.data as any)?.accessToken as string | undefined;
       const user = (res.data as any)?.user as Me | undefined;
 
@@ -71,9 +70,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       set({ accessToken, me: user });
-    }catch(err){
-      set({accessToken: null, me: null})
-      throw err
+    } catch (err) {
+      set({ accessToken: null, me: null });
+      throw err;
     }
   },
 

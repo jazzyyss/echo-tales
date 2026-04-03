@@ -3,9 +3,10 @@ import moment from "moment";
 import { MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
 
-import { createTale } from "../../api/tales";
+import { createTale, uploadTaleImages } from "../../api/tales";
 import TagInput from "../../components/Input/TagInput";
 import ImageSelector from "../../components/Input/ImageSelector";
+import type { ImageAsset } from "../../types/media";
 
 export default function TaleAddModal({
   onClose,
@@ -18,15 +19,22 @@ export default function TaleAddModal({
   const [story, setStory] = useState("");
   const [visitedLocation, setVisitedLocation] = useState<string[]>([]);
   const [visitedDate, setVisitedDate] = useState<Date>(new Date());
+
   const [images, setImages] = useState<File[]>([]);
+  const [visibility, setVisibility] = useState<"private" | "public" | "unlisted">("public");
+  const [isFav, setIsFav] = useState(false);
+
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const canSubmit = useMemo(() => title.trim() && story.trim(), [title, story]);
+  const canSubmit = useMemo(() => {
+    return title.trim().length > 0 && story.trim().length > 0 && images.length > 0;
+  }, [title, story, images.length]);
 
   const submit = async () => {
     if (!canSubmit) {
-      setError("Title and story are required.");
+      setError("Title, story, and at least one image are required.");
       return;
     }
 
@@ -34,13 +42,20 @@ export default function TaleAddModal({
     setSaving(true);
 
     try {
+      setUploading(true);
+      const uploadedImages: ImageAsset[] = await uploadTaleImages(images);
+      setUploading(false);
+
       await createTale({
         title: title.trim(),
         story: story.trim(),
+        visibility,
         visitedLocation,
-        visitedDate,
-        images,
+        isFav,
+        images: uploadedImages,
+        visitedDate: moment(visitedDate).toISOString(),
       });
+
       toast.success("Tale created");
       await onSaved();
       onClose();
@@ -48,6 +63,7 @@ export default function TaleAddModal({
       setError("Failed to create tale.");
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   };
 
@@ -56,7 +72,11 @@ export default function TaleAddModal({
       <div className="flex items-start justify-between gap-4 mb-6">
         <h5 className="text-xl font-medium text-slate-700">Add Tale</h5>
 
-        <button className="text-slate-700 p-2 rounded-full" onClick={onClose} aria-label="Close">
+        <button
+          className="text-slate-700 p-2 rounded-full"
+          onClick={onClose}
+          aria-label="Close"
+        >
           <MdClose className="text-2xl" />
         </button>
       </div>
@@ -83,6 +103,30 @@ export default function TaleAddModal({
           />
         </div>
 
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold text-slate-600">Visibility</label>
+          <select
+            className="border rounded px-3 py-2 bg-white"
+            value={visibility}
+            onChange={(e) =>
+              setVisibility(e.target.value as "private" | "public" | "unlisted")
+            }
+          >
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+            <option value="unlisted">Unlisted</option>
+          </select>
+        </div>
+
+        <label className="flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={isFav}
+            onChange={(e) => setIsFav(e.target.checked)}
+          />
+          Mark as favorite
+        </label>
+
         <ImageSelector images={images} setImages={setImages} />
 
         <div className="flex flex-col gap-2">
@@ -96,9 +140,17 @@ export default function TaleAddModal({
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-slate-600 block mb-2">VISITED LOCATIONS</label>
+          <label className="text-xs font-semibold text-slate-600 block mb-2">
+            VISITED LOCATIONS
+          </label>
           <TagInput tags={visitedLocation} setTags={setVisitedLocation} />
         </div>
+
+        {images.length > 0 && (
+          <p className="text-xs text-slate-500">
+            {images.length} image{images.length > 1 ? "s" : ""} selected
+          </p>
+        )}
 
         {error && <p className="text-red-500 text-xs">{error}</p>}
 
@@ -106,10 +158,10 @@ export default function TaleAddModal({
           type="button"
           className="w-full sm:w-auto px-4 py-2 rounded bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-50"
           onClick={submit}
-          disabled={saving}
+          disabled={saving || uploading}
         >
           <span className="inline-flex items-center gap-2">
-            Create
+            {saving || uploading ? "Saving..." : "Create"}
           </span>
         </button>
       </div>

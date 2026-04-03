@@ -18,6 +18,10 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.custom<StringValue>().default("30d"),
 
   COOKIE_SECURE: z.coerce.boolean().default(false),
+
+  CLOUDINARY_CLOUD_NAME: z.string().min(1),
+  CLOUDINARY_API_KEY: z.string().min(1),
+  CLOUDINARY_API_SECRET: z.string().min(1),
 });
 
 export const env = envSchema.parse(process.env);

@@ -16,14 +16,42 @@ function setRefreshCookie(res: Response, token: string) {
 function clearRefreshCookie(res: Response) {
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: env.COOKIE_SECURE, // MUST match setRefreshCookie
+    secure: env.COOKIE_SECURE,
     sameSite: "none",
     path: "/api/auth/refresh",
   });
 }
 
 
-function toPublic(user: { _id: unknown; fullName: string; username: string; email: string; createdAt: Date; updatedAt: Date }) {
+function toPublic(user: {
+  _id: unknown;
+  fullName: string;
+  username: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+  media?: {
+    profilePicture?: {
+      publicId?: string | null;
+      secureUrl?: string | null;
+      width?: number | null;
+      height?: number | null;
+      format?: string | null;
+      bytes?: number | null;
+      uploadedAt?: Date | null;
+    } | null;
+  } | null;
+}) {
+  const profilePicture = {
+    publicId: user.media?.profilePicture?.publicId ?? null,
+    secureUrl: user.media?.profilePicture?.secureUrl ?? null,
+    width: user.media?.profilePicture?.width ?? null,
+    height: user.media?.profilePicture?.height ?? null,
+    format: user.media?.profilePicture?.format ?? null,
+    bytes: user.media?.profilePicture?.bytes ?? null,
+    uploadedAt: user.media?.profilePicture?.uploadedAt ?? null,
+  };
+
   return {
     id: String(user._id),
     fullName: user.fullName,
@@ -31,6 +59,9 @@ function toPublic(user: { _id: unknown; fullName: string; username: string; emai
     email: user.email,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+    media: {
+      profilePicture,
+    },
   };
 }
 
@@ -76,10 +107,6 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-/**
- * POST /api/auth/refresh
- * Reads refresh token from httpOnly cookie, rotates it, returns a new access token.
- */
 export async function refresh(req: Request, res: Response) {
   const token = req.cookies?.refreshToken as string | undefined;
   if (!token) return res.status(401).json({ message: "Missing refresh token" });
@@ -96,10 +123,6 @@ export async function refresh(req: Request, res: Response) {
   }
 }
 
-/**
- * POST /api/auth/logout
- * Must be protected with requireAuth middleware.
- */
 export async function logout(req: Request, res: Response) {
   const userId = req.user?.sub;
   if (!userId) return res.status(401).json({ message: "Unauthorized" });

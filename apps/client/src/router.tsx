@@ -7,6 +7,7 @@ import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 import NotFound from "./pages/not-found/NotFound";
 import TalesPage from "./pages/tales/TalesPage";
+import Profile from "./pages/profile/Profile";
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,13 @@ export const router = createBrowserRouter([
             <TalesPage />
           </RequireAuth>
         ),
+      },
+      {
+        path: "me/:username",
+        element: (
+          <RequireAuth>
+            <Profile />
+          </RequireAuth>)
       },
       {
         path: "login",

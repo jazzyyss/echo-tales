@@ -13,7 +13,7 @@ export default function SearchBar({
   onClear: () => void;
 }) {
   return (
-    <div className="w-80 max-w-[70vw] flex items-center px-4 bg-slate-100 rounded-md">
+    <div className="w-60 max-w-[45vw] md:w-80 md:max-w-[70vw] flex items-center px-4 bg-slate-100 rounded-md">
       <input
         type="text"
         placeholder="Search tales"
