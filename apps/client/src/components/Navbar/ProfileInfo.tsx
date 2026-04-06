@@ -22,9 +22,19 @@ export default function ProfileInfo({
   return (
     <div className={`flex items-center gap-3 ${isMobile ? "flex-col" : ""}`}>
       <Link to={`/me/${me.username}`} 
-        className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-slate-100"
+        className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center overflow-hidden rounded-full text-slate-950 font-medium bg-slate-100"
       >
-        {getInitials(me.fullName)}
+        {me?.media.profilePicture.secureUrl ? (
+          <img
+            src={me.media.profilePicture.secureUrl}
+            alt={me.fullName}
+            /* className="h-24 w-24 rounded-3xl object-cover border border-slate-200 shadow-sm" */
+          />
+        ) : (
+          <div /* className="flex h-24 w-24 items-center justify-center rounded-3xl bg-cyan-600 text-3xl font-semibold text-white shadow-sm" */>
+            {getInitials(me.fullName)}
+          </div>
+        )}
       </Link>
       <div className={isMobile ? "text-center" : ""}>
         <p className="text-sm font-medium truncate max-w-[200px]">{me.fullName}</p>

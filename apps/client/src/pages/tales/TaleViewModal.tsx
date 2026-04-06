@@ -1,6 +1,7 @@
 import moment from "moment";
 import { MdClose, MdDelete, MdLocationOn, MdFavorite } from "react-icons/md";
 import type { Tale } from "../../types/tale";
+import { useAuthStore, type Me } from "../../auth/authStore";
 
 export default function TaleViewModal({
   tale,
@@ -13,6 +14,7 @@ export default function TaleViewModal({
 }) {
   if (!tale) return null;
 
+  const me: Me | null = useAuthStore(s => s.me);
   return (
     <div className="relative w-full max-w-4xl mx-auto p-4">
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -81,16 +83,18 @@ export default function TaleViewModal({
           <p className="text-sm leading-7 text-slate-700 whitespace-pre-wrap">{tale.story}</p>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onDelete}
-            className="inline-flex items-center gap-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-          >
-            <MdDelete className="text-lg" />
-            Delete
-          </button>
-        </div>
+        {tale.owner._id == me?.id && 
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onDelete}
+              className="inline-flex items-center gap-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            >
+              <MdDelete className="text-lg" />
+              Delete
+            </button>
+          </div>
+        }
       </div>
     </div>
   );

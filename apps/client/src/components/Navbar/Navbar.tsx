@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../auth/authStore";
 import ProfileInfo from "./ProfileInfo";
 import SearchBar from "./SearchBar";
+import { Link } from "react-router-dom";
 
 type Props = {
   searchQuery: string;
@@ -42,7 +43,7 @@ export default function Navbar({ searchQuery, setSearchQuery, onSearch, onClearS
     <nav className="bg-white sticky top-0 z-50 border-b">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
-          <div className="flex items-center font-semibold text-slate-900">Tales<span className="text-blue-400">Echo</span></div>
+          <Link to="/dashboard" className="flex items-center font-semibold text-slate-900">Tales<span className="text-blue-400">Echo</span></Link>
 
           {authed && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
