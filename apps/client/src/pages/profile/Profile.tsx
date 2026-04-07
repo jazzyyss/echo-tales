@@ -157,7 +157,7 @@ export default function Profile() {
       />
 
       <div className="min-h-screen bg-slate-50">
-        {/* <div className="md:hidden sticky top-0 z-50 h-16 bg-white border-b px-4 flex items-center justify-between">
+        <div className="md:hidden sticky top-0 z-50 h-16 bg-white border-b px-4 flex items-center justify-between">
           <button
             type="button"
             onClick={() => setSidebarOpen((v) => !v)}
@@ -169,7 +169,7 @@ export default function Profile() {
 
           <div className="font-semibold text-slate-800">Profile</div>
           <div className="w-10" />
-        </div> */}
+        </div>
 
         <div className="mx-auto max-w-7xl px-4 py-4 md:py-6">
           <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">

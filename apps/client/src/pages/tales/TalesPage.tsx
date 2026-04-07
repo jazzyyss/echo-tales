@@ -5,6 +5,7 @@ import { DayPicker } from "react-day-picker";
 import { MdAdd, MdCalendarMonth, MdClose } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "react-day-picker/dist/style.css";
 
 import type { Tale } from "../../types/tale";
 import { deleteTale, listTales, toggleFav } from "../../api/tales";
@@ -88,8 +89,14 @@ export default function TalesPage() {
   const onSelectRange = (range: { from?: Date; to?: Date } | undefined) => {
     const from = range?.from ?? null;
     const to = range?.to ?? null;
+
     setDateRange({ from, to });
-    if (from && to) setFilterType("date");
+
+    if (from && to) {
+      setFilterType("date");
+    } else {
+      setFilterType(""); // ← this is the missing piece
+    }
   };
 
   const resetFilter = () => {
@@ -139,7 +146,11 @@ export default function TalesPage() {
           <div className="flex items-center gap-2">
             <MdCalendarMonth className="text-xl text-slate-600" />
             <span className="text-sm font-medium">
-              {dateRange.from || dateRange.to ? "Selected Date Range" : "Select Dates"}
+              {dateRange.from && dateRange.to
+                ? "Selected Date Range"
+                : dateRange.from
+                ? "Select end date"
+                : "Select Dates"}
             </span>
           </div>
 
@@ -164,7 +175,6 @@ export default function TalesPage() {
                   selected={dateRange as any}
                   onSelect={(r) => {
                     onSelectRange(r as any);
-                    if ((r as any)?.from && (r as any)?.to) setShowMobileCalendar(false);
                   }}
                   pagedNavigation
                 />
