@@ -253,7 +253,7 @@ export default function Profile() {
                 type="button"
                 onClick={handleProfileUploadClick}
                 disabled={uploadingAvatar}
-                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700 disabled:opacity-50 cursor-pointer"
               >
                 <MdCameraAlt />
                 {uploadingAvatar ? "Uploading..." : "Change profile picture"}
@@ -264,7 +264,7 @@ export default function Profile() {
                   type="button"
                   onClick={handleDeleteProfilePicture}
                   disabled={uploadingAvatar}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-50 hover:bg-red-800 disabled:opacity-50 cursor-pointer"
                 >
                   <MdDeleteOutline />
                   Remove picture

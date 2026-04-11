@@ -14,7 +14,7 @@ type Props = {
   onClearSearch: () => void;
 };
 
-export default function Navbar({ searchQuery, setSearchQuery, onSearch, onClearSearch }: Props) {
+export default function Navbar({ searchQuery, setSearchQuery, onSearch, onClearSearch}: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 

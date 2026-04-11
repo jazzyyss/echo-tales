@@ -34,7 +34,7 @@ export default function TalesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("");
   const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
-  const [showMobileCalendar, setShowMobileCalendar] = useState(false);
+  const [showDateFilter, setShowDateFilter] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -94,14 +94,16 @@ export default function TalesPage() {
 
     if (from && to) {
       setFilterType("date");
+      setShowDateFilter(false);
     } else {
-      setFilterType(""); // ← this is the missing piece
+      setFilterType("");
     }
   };
 
   const resetFilter = () => {
     setDateRange({ from: null, to: null });
     setFilterType("");
+    setShowDateFilter(false);
   };
 
   const handleFavToggle = async (t: Tale, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -139,90 +141,83 @@ export default function TalesPage() {
       <div className="container mx-auto py-4 sm:py-6 md:py-10 px-4 sm:px-6">
         <FilterInfoTitle filterType={filterType} filterDates={dateRange} onClear={resetFilter} />
 
-        <button
-          className="md:hidden w-full mb-4 p-3 flex items-center justify-between bg-white border border-slate-200 rounded-lg shadow-sm"
-          onClick={() => setShowMobileCalendar((v) => !v)}
-        >
-          <div className="flex items-center gap-2">
-            <MdCalendarMonth className="text-xl text-slate-600" />
-            <span className="text-sm font-medium">
-              {dateRange.from && dateRange.to
-                ? "Selected Date Range"
-                : dateRange.from
-                ? "Select end date"
-                : "Select Dates"}
-            </span>
-          </div>
-
-          {showMobileCalendar ? (
-            <MdClose className="text-xl text-slate-600" />
-          ) : (
-            <span className="text-sm text-slate-600">
-              {dateRange.from && dateRange.to
-                ? `${moment(dateRange.from).format("MMM D")} - ${moment(dateRange.to).format("MMM D")}`
-                : "No dates selected"}
-            </span>
-          )}
-        </button>
-
-        {showMobileCalendar && (
-          <div className="md:hidden mb-4">
-            <div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg">
-              <div className="p-3">
-                <DayPicker
-                  captionLayout="dropdown"
-                  mode="range"
-                  selected={dateRange as any}
-                  onSelect={(r) => {
-                    onSelectRange(r as any);
-                  }}
-                  pagedNavigation
+        <div className="flex-1">
+          {loading ? (
+            <div className="text-sm text-slate-500">Loading...</div>
+          ) : filtered.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {filtered.map((t) => (
+                <TravelStoryCard
+                  key={t.id}
+                  imgUrl={t.images?.[0]?.secureUrl ?? ""}
+                  title={t.title}
+                  story={t.story}
+                  date={t.visitedDate}
+                  visitedLocation={t.visitedLocation}
+                  isFavorite={t.isFav}
+                  onClick={() => setOpenView({ isShown: true, data: t })}
+                  onFavoriteToggle={(e) => handleFavToggle(t, e)}
                 />
-              </div>
+              ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <EmptyCard message={getEmptyMessage(filterType)} />
+          )}
+        </div>
+      </div>
 
-        <div className="flex flex-col md:flex-row gap-4 md:gap-7">
-          <div className="flex-1 order-2 md:order-1">
-            {loading ? (
-              <div className="text-sm text-slate-500">Loading…</div>
-            ) : filtered.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filtered.map((t) => (
-                  <TravelStoryCard
-                    key={t.id}
-                    imgUrl={t.images?.[0]?.secureUrl ?? ""}
-                    title={t.title}
-                    story={t.story}
-                    date={t.visitedDate}
-                    visitedLocation={t.visitedLocation}
-                    isFavorite={t.isFav}
-                    onClick={() => setOpenView({ isShown: true, data: t })}
-                    onFavoriteToggle={(e) => handleFavToggle(t, e)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyCard message={getEmptyMessage(filterType)} />
-            )}
-          </div>
+      {showDateFilter && (
+        <div
+          className="fixed inset-0 z-40 bg-black/20"
+          onClick={() => setShowDateFilter(false)}
+        >
+          <div
+            className="absolute left-1/2 -translate-x-1/2 bottom-24 sm:bottom-28 w-[92vw] max-w-[350px] rounded-xl border border-slate-200 bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <h3 className="text-sm font-semibold text-slate-800">Filter by date</h3>
+              <button
+                className="rounded-md p-1 hover:bg-slate-100"
+                onClick={() => setShowDateFilter(false)}
+                aria-label="Close date filter"
+              >
+                <MdClose className="text-xl text-slate-600" />
+              </button>
+            </div>
 
-          <div className="hidden md:block w-[350px] order-1 md:order-2">
-            <div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg">
-              <div className="p-3">
-                <DayPicker
-                  captionLayout="dropdown"
-                  mode="range"
-                  selected={dateRange as any}
-                  onSelect={onSelectRange as any}
-                  pagedNavigation
-                />
+            <div className="p-3">
+              <DayPicker
+                captionLayout="dropdown"
+                mode="range"
+                min={1}
+                selected={dateRange as any}
+                onSelect={(r) => onSelectRange(r as any)}
+                pagedNavigation
+              />
+            </div>
+
+            <div className="flex items-center justify-between border-t px-4 py-3">
+              <button
+                className="text-sm font-medium text-slate-500 hover:text-slate-700"
+                onClick={resetFilter}
+              >
+                Clear
+              </button>
+
+              <div className="text-xs text-slate-500">
+                {dateRange.from && dateRange.to
+                  ? `${moment(dateRange.from).format("MMM D")} - ${moment(dateRange.to).format(
+                      "MMM D"
+                    )}`
+                  : dateRange.from
+                  ? "Select end date"
+                  : "No dates selected"}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <Modal
         isOpen={openAdd}
@@ -293,13 +288,27 @@ export default function TalesPage() {
         />
       </Modal>
 
-      <button
-        className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 fixed right-4 bottom-4 sm:right-10 sm:bottom-10 shadow-lg"
-        onClick={() => setOpenAdd(true)}
-        aria-label="Add tale"
-      >
-        <MdAdd className="text-2xl sm:text-[32px] text-white" />
-      </button>
+      <div className="fixed right-4 bottom-4 sm:right-10 sm:bottom-10 z-50 flex flex-col gap-3">
+        <button
+          className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-white border border-slate-200 hover:bg-slate-50 shadow-lg"
+          onClick={() => setShowDateFilter((v) => !v)}
+          aria-label="Open date filter"
+        >
+          {showDateFilter ? (
+            <MdClose className="text-2xl text-slate-700" />
+          ) : (
+            <MdCalendarMonth className="text-2xl text-slate-700" />
+          )}
+        </button>
+
+        <button
+          className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 shadow-lg"
+          onClick={() => setOpenAdd(true)}
+          aria-label="Add tale"
+        >
+          <MdAdd className="text-2xl sm:text-[32px] text-white" />
+        </button>
+      </div>
 
       <ToastContainer />
     </>
