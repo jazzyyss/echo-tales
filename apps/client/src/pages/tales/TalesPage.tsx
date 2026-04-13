@@ -2,24 +2,46 @@ import { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import Modal from "react-modal";
 import { DayPicker } from "react-day-picker";
-import { MdAdd, MdCalendarMonth, MdClose } from "react-icons/md";
+import { MdCalendarMonth, MdClose } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-day-picker/dist/style.css";
 
 import type { Tale } from "../../types/tale";
-import { deleteTale, listTales, toggleFav } from "../../api/tales";
+import { deleteTale, listTales, toggleLike } from "../../api/tales";
 import { getEmptyMessage, type FilterType } from "../../utils/empty";
 
 import EmptyCard from "../../components/Cards/EmptyCard";
 import FilterInfoTitle from "../../components/Cards/FilterInfoTitle";
 import TravelStoryCard from "../../components/Cards/TravelStoryCard";
-
 import Navbar from "../../components/Navbar/Navbar";
 import TaleViewModal from "./TaleViewModal";
 import TaleAddModal from "./TaleAddEditModal";
 
 type DateRange = { from: Date | null; to: Date | null };
+
+const modalStyle = {
+  overlay: {
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    zIndex: 999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: {
+    position: "relative" as const,
+    inset: "auto",
+    maxWidth: "92vw",
+    width: "760px",
+    maxHeight: "90vh",
+    margin: "20px",
+    overflow: "auto" as const,
+    padding: "24px",
+    borderRadius: "24px",
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+  },
+};
 
 export default function TalesPage() {
   const [tales, setTales] = useState<Tale[]>([]);
@@ -76,6 +98,11 @@ export default function TalesPage() {
     return tales;
   }, [tales, filterType, searchQuery, dateRange]);
 
+  const favoriteCount = useMemo(
+    () => tales.filter((t) => t.isFav).length,
+    [tales]
+  );
+
   const onSearch = (q: string) => {
     setSearchQuery(q);
     setFilterType("search");
@@ -95,8 +122,6 @@ export default function TalesPage() {
     if (from && to) {
       setFilterType("date");
       setShowDateFilter(false);
-    } else {
-      setFilterType("");
     }
   };
 
@@ -106,22 +131,21 @@ export default function TalesPage() {
     setShowDateFilter(false);
   };
 
-  const handleFavToggle = async (t: Tale, e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleLikeToggle = async (t: Tale, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
     try {
-      const updated = await toggleFav(t.id);
+      const updated = await toggleLike(t.id);
       setTales((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
-      toast.success("Updated");
     } catch {
-      toast.error("Failed to update");
+      toast.error("Failed to update like");
     }
   };
 
   const handleDelete = async (t: Tale) => {
     try {
       await deleteTale(t.id);
-      toast.success("Deleted");
+      toast.success("Tale deleted");
       setOpenView({ isShown: false, data: null });
       await load();
     } catch {
@@ -136,57 +160,36 @@ export default function TalesPage() {
         setSearchQuery={setSearchQuery}
         onSearch={onSearch}
         onClearSearch={clearSearch}
+        onCreateClick={() => setOpenAdd(true)}
       />
 
-      <div className="container mx-auto py-4 sm:py-6 md:py-10 px-4 sm:px-6">
-        <FilterInfoTitle filterType={filterType} filterDates={dateRange} onClear={resetFilter} />
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+          <div className="mt-6">
+            <FilterInfoTitle
+              filterType={filterType}
+              filterDates={dateRange}
+              onClear={resetFilter}
+            />
+          </div>
 
-        <div className="flex-1">
-          {loading ? (
-            <div className="text-sm text-slate-500">Loading...</div>
-          ) : filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filtered.map((t) => (
-                <TravelStoryCard
-                  key={t.id}
-                  imgUrl={t.images?.[0]?.secureUrl ?? ""}
-                  title={t.title}
-                  story={t.story}
-                  date={t.visitedDate}
-                  visitedLocation={t.visitedLocation}
-                  isFavorite={t.isFav}
-                  onClick={() => setOpenView({ isShown: true, data: t })}
-                  onFavoriteToggle={(e) => handleFavToggle(t, e)}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyCard message={getEmptyMessage(filterType)} />
-          )}
-        </div>
-      </div>
-
-      {showDateFilter && (
-        <div
-          className="fixed inset-0 z-40 bg-black/20"
-          onClick={() => setShowDateFilter(false)}
-        >
-          <div
-            className="absolute left-1/2 -translate-x-1/2 bottom-24 sm:bottom-28 w-[92vw] max-w-[350px] rounded-xl border border-slate-200 bg-white shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <h3 className="text-sm font-semibold text-slate-800">Filter by date</h3>
-              <button
-                className="rounded-md p-1 hover:bg-slate-100"
-                onClick={() => setShowDateFilter(false)}
-                aria-label="Close date filter"
-              >
-                <MdClose className="text-xl text-slate-600" />
-              </button>
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Recent memories</h2>
             </div>
 
-            <div className="p-3">
+            <button
+              type="button"
+              onClick={() => setShowDateFilter((v) => !v)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              {showDateFilter ? <MdClose className="text-lg" /> : <MdCalendarMonth className="text-lg" />}
+              Date filter
+            </button>
+          </div>
+
+          {showDateFilter && (
+            <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
               <DayPicker
                 captionLayout="dropdown"
                 mode="range"
@@ -196,56 +199,43 @@ export default function TalesPage() {
                 pagedNavigation
               />
             </div>
+          )}
 
-            <div className="flex items-center justify-between border-t px-4 py-3">
-              <button
-                className="text-sm font-medium text-slate-500 hover:text-slate-700"
-                onClick={resetFilter}
-              >
-                Clear
-              </button>
-
-              <div className="text-xs text-slate-500">
-                {dateRange.from && dateRange.to
-                  ? `${moment(dateRange.from).format("MMM D")} - ${moment(dateRange.to).format(
-                      "MMM D"
-                    )}`
-                  : dateRange.from
-                  ? "Select end date"
-                  : "No dates selected"}
-              </div>
+          {loading ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm">
+              Loading tales...
             </div>
-          </div>
+          ) : filtered.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((t) => (
+                <TravelStoryCard
+                  key={t.id}
+                  imgUrl={t.images?.[0]?.secureUrl ?? ""}
+                  title={t.title ?? ""}
+                  story={t.story ?? ""}
+                  date={t.visitedDate}
+                  visitedLocation={t.visitedLocation}
+                  isLiked={t.isLikedByMe}
+                  likeCount={t.likeCount}
+                  commentCount={t.commentCount}
+                  onClick={() => setOpenView({ isShown: true, data: t })}
+                  onLikeToggle={(e) => handleLikeToggle(t, e)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+              <EmptyCard message={getEmptyMessage(filterType)} />
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <Modal
         isOpen={openAdd}
         onRequestClose={() => setOpenAdd(false)}
         appElement={document.getElementById("root") as HTMLElement}
-        className="model-box"
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-            zIndex: 999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          },
-          content: {
-            position: "relative",
-            inset: "auto",
-            maxWidth: "90vw",
-            width: "600px",
-            maxHeight: "90vh",
-            margin: "20px",
-            overflow: "auto",
-            padding: "20px",
-            borderRadius: "8px",
-            background: "#fff",
-            border: "1px solid #ccc",
-          },
-        }}
+        style={modalStyle}
       >
         <TaleAddModal onClose={() => setOpenAdd(false)} onSaved={load} />
       </Modal>
@@ -254,29 +244,7 @@ export default function TalesPage() {
         isOpen={openView.isShown}
         onRequestClose={() => setOpenView({ isShown: false, data: null })}
         appElement={document.getElementById("root") as HTMLElement}
-        className="model-box"
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-            zIndex: 999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          },
-          content: {
-            position: "relative",
-            inset: "auto",
-            maxWidth: "90vw",
-            width: "700px",
-            maxHeight: "90vh",
-            margin: "20px",
-            overflow: "auto",
-            padding: "20px",
-            borderRadius: "8px",
-            background: "#fff",
-            border: "1px solid #ccc",
-          },
-        }}
+        style={modalStyle}
       >
         <TaleViewModal
           tale={openView.data}
@@ -288,27 +256,13 @@ export default function TalesPage() {
         />
       </Modal>
 
-      <div className="fixed right-4 bottom-4 sm:right-10 sm:bottom-10 z-50 flex flex-col gap-3">
-        <button
-          className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-white border border-slate-200 hover:bg-slate-50 shadow-lg"
-          onClick={() => setShowDateFilter((v) => !v)}
-          aria-label="Open date filter"
-        >
-          {showDateFilter ? (
-            <MdClose className="text-2xl text-slate-700" />
-          ) : (
-            <MdCalendarMonth className="text-2xl text-slate-700" />
-          )}
-        </button>
-
-        <button
-          className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 shadow-lg"
-          onClick={() => setOpenAdd(true)}
-          aria-label="Add tale"
-        >
-          <MdAdd className="text-2xl sm:text-[32px] text-white" />
-        </button>
-      </div>
+      <button
+        className="fixed bottom-5 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-cyan-600 text-white shadow-lg hover:bg-cyan-700 md:hidden"
+        onClick={() => setOpenAdd(true)}
+        aria-label="Add tale"
+      >
+        +
+      </button>
 
       <ToastContainer />
     </>

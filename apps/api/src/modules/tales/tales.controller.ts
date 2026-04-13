@@ -1,6 +1,10 @@
 import type { Request, Response } from "express";
 import * as TaleService from "./tales.services.js";
-import { createTaleSchema, updateTaleSchema } from "./tales.validation.js";
+import {
+  createCommentSchema,
+  createTaleSchema,
+  updateTaleSchema,
+} from "./tales.validation.js";
 import {
   uploadImageBuffer,
   deleteImageByPublicId,
@@ -62,9 +66,7 @@ export async function deleteImage(req: Request, res: Response) {
 
     try {
       await deleteImageByPublicId(publicId);
-    } catch {
-      // DB stays source of truth
-    }
+    } catch {}
 
     return res.status(204).send();
   } catch (err) {
@@ -93,7 +95,18 @@ export async function create(req: Request, res: Response) {
 
 export async function list(req: Request, res: Response) {
   try {
-    const tales = await TaleService.listTales();
+    const userId = requireUserId(req);
+    const tales = await TaleService.listTales(userId);
+    return res.status(200).json({ tales });
+  } catch (err) {
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
+export async function listMine(req: Request, res: Response) {
+  try {
+    const userId = requireUserId(req);
+    const tales = await TaleService.listMyTales(userId);
     return res.status(200).json({ tales });
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
@@ -143,9 +156,7 @@ export async function remove(req: Request, res: Response) {
       await Promise.all(
         (deleted.images ?? []).map((img: any) => deleteImageByPublicId(img.publicId))
       );
-    } catch {
-      // DB still source of truth
-    }
+    } catch {}
 
     return res.status(204).send();
   } catch (err) {
@@ -158,6 +169,64 @@ export async function toggleFav(req: Request, res: Response) {
     const userId = requireUserId(req);
     const tale = await TaleService.toggleFav(userId, req.params.id as string);
     return res.status(200).json({ tale });
+  } catch (err) {
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
+export async function toggleLike(req: Request, res: Response) {
+  try {
+    const userId = requireUserId(req);
+    const tale = await TaleService.toggleLike(userId, req.params.id as string);
+    return res.status(200).json({ tale });
+  } catch (err) {
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
+export async function listComments(req: Request, res: Response) {
+  try {
+    const userId = requireUserId(req);
+    const comments = await TaleService.listComments(userId, req.params.id as string);
+    return res.status(200).json({ comments });
+  } catch (err) {
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
+export async function addComment(req: Request, res: Response) {
+  try {
+    const userId = requireUserId(req);
+
+    const parsed = createCommentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Invalid input",
+        errors: parsed.error.flatten(),
+      });
+    }
+
+    const comment = await TaleService.addComment(
+      userId,
+      req.params.id as string,
+      parsed.data.body
+    );
+
+    return res.status(201).json({ comment });
+  } catch (err) {
+    return res.status(statusFromError(err)).json({ message: messageFromError(err) });
+  }
+}
+
+export async function deleteComment(req: Request, res: Response) {
+  try {
+    const userId = requireUserId(req);
+    await TaleService.deleteComment(
+      userId,
+      req.params.id as string,
+      req.params.commentId as string
+    );
+    return res.status(204).send();
   } catch (err) {
     return res.status(statusFromError(err)).json({ message: messageFromError(err) });
   }

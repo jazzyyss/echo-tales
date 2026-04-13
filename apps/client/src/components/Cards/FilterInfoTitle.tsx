@@ -16,23 +16,39 @@ export default function FilterInfoTitle({
   if (!filterType) return null;
 
   if (filterType === "search") {
-    return <h3 className="text-lg font-medium mb-3">Search Results</h3>;
-  }
-
-  const startDate = filterDates.from ? moment(filterDates.from).format("Do MMM YYYY") : "N/A";
-  const endDate = filterDates.to ? moment(filterDates.to).format("Do MMM YYYY") : "N/A";
-
-  return (
-    <div className="flex items-center gap-2 mb-3 flex-wrap">
-      <h3 className="text-lg font-medium">Travel Stories from</h3>
-      <div className="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded">
-        <p className="text-xs font-medium">
-          {startDate} - {endDate}
-        </p>
-        <button onClick={onClear} aria-label="Clear date filter">
+    return (
+      <div className="mb-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+        <p className="text-sm font-medium text-slate-700">Showing search results</p>
+        <button
+          type="button"
+          onClick={onClear}
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800"
+        >
           <MdOutlineClose />
+          Clear
         </button>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (filterType === "date" && filterDates.from && filterDates.to) {
+    return (
+      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+        <p className="text-sm font-medium text-slate-700">
+          {moment(filterDates.from).format("MMM D, YYYY")} -{" "}
+          {moment(filterDates.to).format("MMM D, YYYY")}
+        </p>
+        <button
+          type="button"
+          onClick={onClear}
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800"
+        >
+          <MdOutlineClose />
+          Clear
+        </button>
+      </div>
+    );
+  }
+
+  return null;
 }

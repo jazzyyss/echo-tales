@@ -2,34 +2,13 @@ import { Schema, model, type InferSchemaType } from "mongoose";
 
 const imageSchema = new Schema(
   {
-    publicId: {
-      type: String,
-      required: true,
-    },
-    secureUrl: {
-      type: String,
-      required: true,
-    },
-    width: {
-      type: Number,
-      default: null,
-    },
-    height: {
-      type: Number,
-      default: null,
-    },
-    format: {
-      type: String,
-      default: null,
-    },
-    bytes: {
-      type: Number,
-      default: null,
-    },
-    uploadedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    publicId: { type: String, required: true },
+    secureUrl: { type: String, required: true },
+    width: { type: Number, default: null },
+    height: { type: Number, default: null },
+    format: { type: String, default: null },
+    bytes: { type: Number, default: null },
+    uploadedAt: { type: Date, default: Date.now },
   },
   { _id: false }
 );
@@ -45,16 +24,16 @@ const taleSchema = new Schema(
     visibility: {
       type: String,
       enum: ["private", "public", "unlisted"],
-      default: "private",
+      default: "public",
       index: true,
     },
     title: {
       type: String,
-      required: true,
+      default: "",
     },
     story: {
       type: String,
-      required: true,
+      default: "",
     },
     visitedLocation: {
       type: [String],
@@ -74,7 +53,17 @@ const taleSchema = new Schema(
     },
     visitedDate: {
       type: Date,
-      required: true,
+      default: Date.now,
+    },
+
+    likedBy: {
+      type: [Schema.Types.ObjectId],
+      ref: "User",
+      default: [],
+    },
+    likeCount: {
+      type: Number,
+      default: 0,
     },
   },
   {
